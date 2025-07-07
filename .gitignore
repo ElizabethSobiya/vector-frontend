@@ -1,0 +1,46 @@
+
+
+# dependencies
+node_modules
+.pnp
+.pnp.js
+
+# testing
+coverage
+
+# production
+.next
+.swc
+_static
+out
+dist
+build
+
+# environment variables
+.env
+.env.local
+.env.staging
+.env.prod
+.env.development.local
+.env.test.local
+.env.production.local
+
+# misc
+.DS_Store
+.vercel
+.netlify
+.unimportedrc.json
+tsconfig.tsbuildinfo
+.vscode
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sentry Config File
+.env.sentry-build-plugin
+.env.*
+
+
+# sonar
+.sonar
