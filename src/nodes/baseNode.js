@@ -2,7 +2,6 @@
 import React from 'react';
 import { Handle, Position } from 'reactflow';
 
-// BaseNode component that handles common functionality
 export const BaseNode = ({ 
   id, 
   data, 
@@ -26,7 +25,8 @@ export const BaseNode = ({
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.15)'
+        boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+        backgroundColor: 'white'
       }}
     >
       <div 
@@ -48,7 +48,7 @@ export const BaseNode = ({
       {/* Input Handles */}
       {inputs.map((input, index) => (
         <Handle
-          key={`input-${input.id}`}
+          key={input.id}
           type="target"
           position={Position.Left}
           id={input.id}
@@ -62,7 +62,7 @@ export const BaseNode = ({
       {/* Output Handles */}
       {outputs.map((output, index) => (
         <Handle
-          key={`output-${output.id}`}
+          key={output.id}
           type="source"
           position={Position.Right}
           id={output.id}
@@ -76,27 +76,26 @@ export const BaseNode = ({
   );
 };
 
-// Factory function to create node components
+// Simplified factory function
 export const createNodeComponent = (config) => {
-  return (props) => {
+  const NodeComponent = (props) => {
     const { id, data } = props;
     
-    // Merge the node-specific configuration with any runtime data
-    const mergedConfig = {
-      ...config,
-      id,
-      data,
-      inputs: typeof config.inputs === 'function' ? config.inputs(id, data) : config.inputs,
-      outputs: typeof config.outputs === 'function' ? config.outputs(id, data) : config.outputs
-    };
-    
-    // Render the content based on the provided render function or component
-    const content = config.renderContent ? config.renderContent(id, data) : null;
+    const inputs = typeof config.inputs === 'function' ? config.inputs(id, data) : config.inputs || [];
+    const outputs = typeof config.outputs === 'function' ? config.outputs(id, data) : config.outputs || [];
     
     return (
-      <BaseNode {...mergedConfig}>
-        {content}
+      <BaseNode 
+        {...config}
+        id={id}
+        data={data}
+        inputs={inputs}
+        outputs={outputs}
+      >
+        {config.renderContent && config.renderContent(id, data)}
       </BaseNode>
     );
   };
+  
+  return NodeComponent;
 };

@@ -1,37 +1,24 @@
 // DynamicTextNode.js
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Handle, Position } from 'reactflow';
 
 export const DynamicTextNode = ({ id, data, selected }) => {
   const [text, setText] = useState(data?.text || '{{input}}');
   const [variables, setVariables] = useState([]);
-  const [textareaHeight, setTextareaHeight] = useState(60);
   
-  // Handle text change
+  // Simple text change handler without store updates
   const handleTextChange = (e) => {
-    const newText = e.target.value;
-    setText(newText);
-    
-    // Update parent data
-    if (data.onChange) {
-      data.onChange({ ...data, text: newText });
-    }
-    
-    // Adjust textarea height
-    const minHeight = 60;
-    const lineHeight = 20;
-    const lines = newText.split('\n').length;
-    const calculatedHeight = Math.max(minHeight, lines * lineHeight);
-    setTextareaHeight(calculatedHeight);
+    setText(e.target.value);
   };
   
-  // Detect variables in text
+  // Detect variables with stable dependency
   useEffect(() => {
     const regex = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
     const detectedVars = [];
     let match;
     
-    while ((match = regex.exec(text)) !== null) {
+    const textToProcess = text || '';
+    while ((match = regex.exec(textToProcess)) !== null) {
       if (!detectedVars.includes(match[1])) {
         detectedVars.push(match[1]);
       }
@@ -40,16 +27,16 @@ export const DynamicTextNode = ({ id, data, selected }) => {
     setVariables(detectedVars);
   }, [text]);
   
-  // Node width based on text length
-  const calculateWidth = () => {
-    const minWidth = 200;
-    const charWidth = 8;
-    const longestLine = text.split('\n')
-      .reduce((max, line) => Math.max(max, line.length), 0);
-    return Math.max(minWidth, longestLine * charWidth);
-  };
+  // Calculate dimensions
+  const minHeight = 60;
+  const lineHeight = 20;
+  const lines = text.split('\n').length;
+  const textareaHeight = Math.max(minHeight, lines * lineHeight);
   
-  const nodeWidth = calculateWidth();
+  const minWidth = 200;
+  const charWidth = 8;
+  const longestLine = text.split('\n').reduce((max, line) => Math.max(max, line.length), 0);
+  const nodeWidth = Math.max(minWidth, longestLine * charWidth);
   
   return (
     <div 
@@ -59,8 +46,7 @@ export const DynamicTextNode = ({ id, data, selected }) => {
         borderRadius: '8px',
         backgroundColor: selected ? '#f5f0ff' : 'white',
         overflow: 'hidden',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-        transition: 'all 0.3s ease'
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
       }}
     >
       <div 
@@ -97,7 +83,7 @@ export const DynamicTextNode = ({ id, data, selected }) => {
       {/* Variable Input Handles */}
       {variables.map((variable, index) => (
         <Handle
-          key={`var-${variable}`}
+          key={variable}
           type="target"
           position={Position.Left}
           id={variable}
@@ -105,22 +91,7 @@ export const DynamicTextNode = ({ id, data, selected }) => {
             top: 40 + (index * 24),
             background: '#9C27B0'
           }}
-        >
-          <div 
-            style={{
-              position: 'absolute',
-              right: 20,
-              fontSize: '10px',
-              background: 'rgba(156, 39, 176, 0.1)',
-              padding: '2px 4px',
-              borderRadius: '4px',
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {variable}
-          </div>
-        </Handle>
+        />
       ))}
       
       {/* Output Handle */}
